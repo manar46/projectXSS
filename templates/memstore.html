@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="stat/style.css">
+    <title>Mem Store</title>
+</head>
+<body>
+ <header>
+    <h1>Mem Store</h1>
+    <div class="search-bar">
+        <input type="text" placeholder="Search products..." id="searchBar">
+        <button id="searchBtn">Search</button>
+    </div>
+ </header>
+ <div id="productModal" class="modal">
+   <div class="modal-content">
+     <span class="close">&times;</span>
+     <img id="modalImg" class="modal-img">
+     <h2 id="modalTitle"></h2>
+     <p id="modalPrice"></p>
+     <p id="modalDesc"></p>
+     <input type="text" id="customText" placeholder="Add customization...">
+     <button class="add-btn" onclick="sendCustomization()">Add to Cart</button>
+   </div>
+ </div>
+ <main>
+    <h2>Products</h2>
+    <div id="productsContainer"></div>
+    <section id="comments">
+        <h3>Leave a Comment</h3>
+        <textarea id="commentInput" rows="2"></textarea>
+        <button id="submitComment">Submit</button>
+        <div id="commentList"></div>
+    </section>
+ </main>
+ <script src="stat/script.js"></script>
+</body>
+</html>

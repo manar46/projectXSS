@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attack Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a; /* خلفية غامقة */
+    margin: 0;
+    padding: 0;
+    color: white;
+}
+
+header {
+    background: #1e3a8a; /* أزرق أفتح */
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+main {
+    padding: 20px;
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* كروت */
+.chart-box, .table-box {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* الرسم */
+.chart-box {
+    width: 220px;
+    height: 220px;
+    flex-shrink: 0;
+}
+
+/* الجدول */
+.table-box {
+    flex: 1;
+    max-width: 900px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
+
+th {
+    background: #3b82f6;
+    color: white;
+}
+
+/* صفوف */
+tr:nth-child(even) {
+    background: #334155;
+}
+
+/* البادجات */
+.badge {
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+}
+
+.script { background: #ef4444; }
+.event { background: #f59e0b; }
+.javascript { background: #3b82f6; }
+.html { background: #a855f7; }
+
+/* النص الطويل */
+td {
+    word-break: break-word;
+    max-width: 250px;
+    overflow-wrap: break-word;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Monitoring Dashboard</h1>
+</header>
+
+<main>
+<div class="dashboard-container">
+
+<div class="chart-box">
+    <canvas id="attackChart"></canvas>
+</div>
+
+<div class="table-box">
+<table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Input</th>
+            <th>Time</th>
+            <th>IP</th>
+        </tr>
+    </thead>
+    <tbody id="attackTable"></tbody>
+</table>
+</div>
+
+</div>
+</main>
+
+<script>
+
+let chart;
+let lastCount = 0;
+
+// حماية العرض
+function escapeHTML(str){
+    return str
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+// رسم البيانات
+function renderChart(data){
+
+    let stats = {};
+
+    data.forEach(a => {
+        stats[a.type] = (stats[a.type] || 0) + 1;
+    });
+
+    const labels = Object.keys(stats);
+    const values = Object.values(stats);
+
+    const ctx = document.getElementById('attackChart').getContext('2d');
+
+    if(!chart){
+        chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#ef4444',
+                        '#f59e0b',
+                        '#3b82f6',
+                        '#a855f7'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false
+            }
+        });
+    }
+    else {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = values;
+        chart.update();
+    }
+}
+
+// جلب البيانات
+async function fetchAttacks(){
+
+    const res = await fetch("/attacks");
+    const data = await res.json();
+
+    if(data.length !== lastCount){
+        renderChart(data);
+        lastCount = data.length;
+    }
+
+    const table = document.getElementById("attackTable");
+    table.innerHTML = "";
+
+    data.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    data.forEach(a => {
+        table.innerHTML += `
+        <tr>
+            <td>
+                <span class="badge ${a.type}">
+                    ${a.type.toUpperCase()}
+                </span>
+            </td>
+            <td>${escapeHTML(a.input)}</td>
+            <td>${a.time}</td>
+            <td>${a.ip}</td>
+        </tr>
+        `;
+    });
+}
+
+// تحديث تلقائي
+setInterval(fetchAttacks, 2000);
+
+// تحميل أول مرة
+window.onload = fetchAttacks;
+
+</script>
+
+</body>
+</html>

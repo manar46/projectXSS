@@ -1,0 +1,2 @@
+[{"input": "<script>alert(1)</script>", "type": "script", "time": "2026-04-20 23:16:49.119448"},
+{"input":"<script>alert(2)</script>","type":"script","time":"2026-05-05 23:05:05.382900","IP":"127.0.0.1"}]
